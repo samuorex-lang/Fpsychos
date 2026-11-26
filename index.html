@@ -1,0 +1,1471 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fpsychos — Contra los depredadores</title>
+    <link rel="icon" type="image/jpeg" href="logo.jpg">
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --bg: #060608;
+            --bg2: #0c0c10;
+            --bg-card: #0f0f14;
+            --bg-card-hover: #15151c;
+            --text: #d4d4d8;
+            --text-dim: #71717a;
+            --text-bright: #fafafa;
+            --purple: #7c3aed;
+            --purple-soft: #a78bfa;
+            --purple-deep: #4c1d95;
+            --purple-glow: rgba(124, 58, 237, 0.25);
+            --border: #1e1e26;
+            --danger: #dc2626;
+            --accent: #8b5cf6;
+        }
+        html { scroll-behavior: smooth; }
+        body {
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            overflow-x: hidden;
+        }
+        a { color: var(--purple-soft); text-decoration: none; transition: color 0.2s; }
+        a:hover { color: var(--text-bright); }
+        ::selection { background: var(--purple-deep); color: #fff; }
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg); }
+        ::-webkit-scrollbar-thumb { background: var(--purple-deep); border-radius: 3px; }
+        img { max-width: 100%; }
+
+        /* NAV */
+        .nav {
+            position: fixed; top: 0; width: 100%; z-index: 1000;
+            background: rgba(6,6,8,0.92); backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            transition: transform 0.3s;
+        }
+        .nav.hide { transform: translateY(-100%); }
+        .nav-inner {
+            max-width: 1280px; margin: 0 auto;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.55rem 1.5rem;
+        }
+        .nav-brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1.15rem; color: var(--text-bright); }
+        .nav-brand img { width: 32px; height: 32px; border-radius: 50%; }
+        .nav-menu { display: flex; gap: 1.2rem; list-style: none; }
+        .nav-menu a { color: var(--text-dim); font-size: 0.85rem; font-weight: 500; }
+        .nav-menu a:hover, .nav-menu a.on { color: var(--purple-soft); }
+        .burger { display: none; background: none; border: none; cursor: pointer; flex-direction: column; gap: 5px; padding: 6px; }
+        .burger span { display: block; width: 24px; height: 2px; background: var(--text-bright); border-radius: 1px; transition: 0.3s; }
+        .burger.active span:nth-child(1) { transform: rotate(45deg) translate(5px, 5px); }
+        .burger.active span:nth-child(2) { opacity: 0; }
+        .burger.active span:nth-child(3) { transform: rotate(-45deg) translate(5px, -5px); }
+        @media(max-width:960px){
+            .burger { display: flex; }
+            .nav-menu {
+                position: fixed; top: 0; right: 0; width: 280px; height: 100vh;
+                flex-direction: column; background: rgba(6,6,8,0.98);
+                padding: 5rem 2rem 2rem; gap: 0.3rem;
+                transform: translateX(100%); transition: 0.35s ease;
+                border-left: 1px solid var(--border);
+                backdrop-filter: blur(20px);
+                z-index: 999;
+                overflow-y: auto;
+            }
+            .nav-menu.open { transform: translateX(0); }
+            .nav-menu a { font-size: 1rem; padding: 0.7rem 0; display: block; border-bottom: 1px solid var(--border); }
+            .nav-menu a:last-child { border-bottom: none; }
+            .nav-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 998; }
+            .nav-overlay.show { display: block; }
+        }
+        @media(max-width:600px){
+            .hero h1 { font-size: 2rem; }
+            .hero .tagline { font-size: 0.95rem; }
+            .hero-logo { width: 140px; height: 140px; }
+            .stitle { font-size: 1.5rem; }
+            .stats { grid-template-columns: repeat(2, 1fr); gap: 1rem; }
+            .stat b { font-size: 1.8rem; }
+            .g2, .g3 { grid-template-columns: 1fr; }
+            .g2x2 { grid-template-columns: 1fr; }
+            .card { padding: 1.3rem; }
+            section { padding: 3rem 1rem; }
+            .alt-bg > .inner { padding: 0 1rem; }
+            .btn { padding: 0.65rem 1.2rem; font-size: 0.85rem; }
+            .comm-grid { grid-template-columns: 1fr; }
+            .nav-menu { width: 100%; }
+        }
+        @media(min-width:601px) and (max-width:960px){
+            .g2x2 { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        /* HERO */
+        .hero {
+            min-height: 100vh; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; text-align: center;
+            padding: 7rem 1.5rem 5rem; position: relative;
+            background: radial-gradient(ellipse at 50% 30%, rgba(124,58,237,0.06) 0%, transparent 65%);
+        }
+        .hero-logo {
+            width: 190px; height: 190px; border-radius: 50%;
+            border: 2px solid var(--purple-deep);
+            box-shadow: 0 0 50px var(--purple-glow);
+            margin-bottom: 2rem;
+            animation: glow 4s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { box-shadow: 0 0 30px var(--purple-glow); }
+            to { box-shadow: 0 0 70px var(--purple-glow), 0 0 120px rgba(124,58,237,0.08); }
+        }
+        .hero h1 { font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800; letter-spacing: 2px; color: var(--text-bright); margin-bottom: 0.8rem; }
+        .hero h1 em { font-style: normal; color: var(--purple-soft); }
+        .hero .tagline { font-size: 1.15rem; color: var(--text-dim); max-width: 650px; margin-bottom: 2.5rem; line-height: 1.8; }
+        .cta-row { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+        .btn {
+            display: inline-flex; align-items: center; gap: 0.45rem;
+            padding: 0.75rem 1.6rem; border-radius: 6px;
+            font-weight: 600; font-size: 0.9rem; cursor: pointer; border: none; transition: all 0.25s;
+        }
+        .btn-fill { background: var(--purple); color: #fff; }
+        .btn-fill:hover { background: var(--accent); transform: translateY(-2px); box-shadow: 0 8px 24px var(--purple-glow); }
+        .btn-ghost { background: transparent; color: var(--purple-soft); border: 1.5px solid var(--purple-deep); }
+        .btn-ghost:hover { background: var(--purple-deep); color: #fff; }
+
+        /* SECTIONS */
+        section { padding: 5rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+        .stitle { font-size: 1.9rem; font-weight: 700; color: var(--text-bright); margin-bottom: 0.4rem; }
+        .ssub { color: var(--text-dim); font-size: 1rem; margin-bottom: 2.2rem; max-width: 780px; }
+        .sbar { width: 60px; height: 3px; background: linear-gradient(90deg, var(--purple), var(--accent)); border-radius: 2px; margin-bottom: 1.8rem; }
+        .divider { max-width: 1200px; margin: 0 auto; height: 1px; background: linear-gradient(90deg, transparent, var(--border), transparent); }
+
+        /* GRID */
+        .grid { display: grid; gap: 1.3rem; }
+        .g2 { grid-template-columns: repeat(auto-fill, minmax(340px, 1fr)); }
+        .g2x2 { grid-template-columns: repeat(2, 1fr); }
+        .g3 { grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); }
+
+        /* CARD */
+        .card {
+            background: var(--bg-card); border: 1px solid var(--border);
+            border-radius: 10px; padding: 1.6rem; position: relative; overflow: hidden;
+            transition: all 0.3s;
+        }
+        .card:hover { border-color: var(--purple-deep); background: var(--bg-card-hover); transform: translateY(-2px); box-shadow: 0 10px 40px rgba(0,0,0,0.25); }
+        .card::after { content:''; position: absolute; top:0; left:0; width:100%; height:2px; background: linear-gradient(90deg, var(--purple-deep), var(--accent)); opacity:0; transition:opacity 0.3s; }
+        .card:hover::after { opacity:1; }
+        .card h3 { font-size: 1.1rem; color: var(--text-bright); margin-bottom: 0.6rem; }
+        .card p, .card li { color: var(--text-dim); font-size: 0.92rem; }
+        .card ul { list-style: none; margin-top: 0.6rem; }
+        .card li { padding: 0.25rem 0; }
+        .card li::before { content:'▸ '; color: var(--purple-soft); }
+        .ci { font-size: 1.5rem; margin-bottom: 0.8rem; display: inline-block; }
+
+        /* STATS */
+        .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; padding: 3.5rem 1.5rem; max-width: 1200px; margin: 0 auto; }
+        .stat { text-align: center; }
+        .stat b { display: block; font-size: 2.4rem; font-weight: 800; color: var(--purple-soft); line-height: 1.2; }
+        .stat span { color: var(--text-dim); font-size: 0.82rem; }
+
+        /* ACCORDION */
+        .acc { max-width: 920px; }
+        .acc-item { border: 1px solid var(--border); border-radius: 8px; margin-bottom: 0.6rem; overflow: hidden; }
+        .acc-head {
+            background: var(--bg-card); padding: 1rem 1.3rem; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center;
+            font-weight: 600; font-size: 0.95rem; color: var(--text-bright); transition: background 0.2s;
+        }
+        .acc-head:hover { background: var(--bg-card-hover); }
+        .acc-head .arr { font-size: 0.7rem; color: var(--purple-soft); transition: transform 0.3s; }
+        .acc-item.open .arr { transform: rotate(180deg); }
+        .acc-body { max-height: 0; overflow: hidden; transition: max-height 0.4s ease; }
+        .acc-inner { padding: 0 1.3rem 1.3rem; color: var(--text-dim); font-size: 0.92rem; line-height: 1.8; }
+        .acc-inner ul { margin: 0.6rem 0 0.6rem 1rem; }
+        .acc-inner li { margin-bottom: 0.3rem; }
+
+        /* BOXES */
+        .box-warn {
+            background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.15);
+            border-left: 3px solid var(--danger); border-radius: 8px;
+            padding: 1.3rem; margin: 1.5rem 0;
+        }
+        .box-warn h4 { color: var(--danger); margin-bottom: 0.4rem; font-size: 0.95rem; }
+        .box-warn p { color: var(--text-dim); font-size: 0.9rem; }
+        .box-info {
+            background: rgba(124,58,237,0.05); border: 1px solid rgba(124,58,237,0.12);
+            border-left: 3px solid var(--purple); border-radius: 8px;
+            padding: 1.3rem; margin: 1.5rem 0;
+        }
+        .box-info h4 { color: var(--purple-soft); margin-bottom: 0.4rem; font-size: 0.95rem; }
+        .box-info p, .box-info li { color: var(--text-dim); font-size: 0.9rem; }
+
+        /* QUOTE */
+        .quote {
+            border-left: 3px solid var(--purple-deep); padding: 1.2rem 1.5rem; margin: 2rem 0;
+            background: rgba(124,58,237,0.03); border-radius: 0 8px 8px 0;
+            font-style: italic; color: var(--text-dim); font-size: 1rem;
+        }
+        .quote cite { display: block; margin-top: 0.5rem; font-style: normal; font-size: 0.82rem; color: var(--purple-soft); }
+
+        /* TABLE */
+        .tw { overflow-x: auto; margin: 1.5rem 0; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
+        th, td { padding: 0.8rem 1rem; text-align: left; border-bottom: 1px solid var(--border); }
+        th { background: var(--bg-card); color: var(--purple-soft); font-weight: 600; }
+        td { color: var(--text-dim); }
+
+        /* COMMUNITY */
+        .comm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 1.3rem; }
+        .comm-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+            padding: 2rem; text-align: center; transition: all 0.3s;
+        }
+        .comm-card:hover { border-color: var(--purple); transform: translateY(-3px); }
+        .comm-card img { width: 70px; height: 70px; border-radius: 50%; margin-bottom: 1rem; border: 2px solid var(--purple-deep); }
+        .comm-card h3 { margin-bottom: 0.5rem; color: var(--text-bright); }
+        .comm-card p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 1rem; }
+
+        /* TOOL TAG */
+        .tool-tag {
+            display: inline-block; background: var(--bg-card); border: 1px solid var(--border);
+            padding: 0.3rem 0.7rem; border-radius: 5px; font-size: 0.8rem; color: var(--purple-soft);
+            margin: 0.2rem; font-family: 'Consolas', monospace;
+        }
+
+        /* FOOTER */
+        footer {
+            border-top: 1px solid var(--border); padding: 2.5rem 1.5rem; text-align: center;
+            background: rgba(0,0,0,0.4);
+        }
+        footer p { color: var(--text-dim); font-size: 0.8rem; margin-bottom: 0.4rem; }
+        .foot-links { display: flex; gap: 1.2rem; justify-content: center; flex-wrap: wrap; margin-top: 0.8rem; }
+        .foot-links a { color: var(--text-dim); font-size: 0.8rem; }
+        .foot-links a:hover { color: var(--purple-soft); }
+
+        /* BACK TOP */
+        .btt {
+            position: fixed; bottom: 1.5rem; right: 1.5rem;
+            width: 40px; height: 40px; border-radius: 50%;
+            background: var(--purple-deep); color: #fff;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.1rem; cursor: pointer; border: none;
+            opacity: 0; transform: translateY(16px);
+            transition: all 0.3s; z-index: 999;
+        }
+        .btt.on { opacity: 1; transform: translateY(0); }
+        .btt:hover { background: var(--purple); }
+
+        /* FADE */
+        .fi { opacity: 0; transform: translateY(24px); transition: opacity 0.5s, transform 0.5s; }
+        .fi.vis { opacity: 1; transform: translateY(0); }
+
+        /* RESOURCE LIST */
+        .rlist { list-style: none; }
+        .rlist li {
+            padding: 0.7rem 1rem; border: 1px solid var(--border); border-radius: 6px;
+            margin-bottom: 0.4rem; display: flex; justify-content: space-between;
+            align-items: center; transition: 0.2s; flex-wrap: wrap; gap: 0.4rem;
+        }
+        .rlist li:hover { border-color: var(--purple-deep); background: var(--bg-card); }
+        .rlist .rn { font-weight: 600; color: var(--text-bright); font-size: 0.9rem; }
+        .rlist .rd { color: var(--text-dim); font-size: 0.82rem; flex: 1; margin: 0 0.8rem; }
+        .rlist .rl { color: var(--purple-soft); font-size: 0.82rem; white-space: nowrap; }
+
+        .mt1 { margin-top: 1rem; } .mt2 { margin-top: 2rem; } .mb1 { margin-bottom: 1rem; } .mb2 { margin-bottom: 2rem; }
+
+        /* Section with slightly different bg */
+        .alt-bg { background: var(--bg2); padding: 5rem 0; }
+        .alt-bg > .inner { max-width: 1200px; margin: 0 auto; padding: 0 1.5rem; }
+
+        /* TICKER */
+        .ticker {
+            text-align: center; padding: 1.5rem; margin-top: 1.5rem;
+            background: rgba(220,38,38,0.06); border: 1px solid rgba(220,38,38,0.12);
+            border-radius: 10px; max-width: 600px; margin-left: auto; margin-right: auto;
+        }
+        .ticker p { color: var(--text-dim); font-size: 0.9rem; margin-bottom: 0.3rem; }
+        .ticker b { font-size: 2rem; color: var(--danger); font-weight: 800; font-variant-numeric: tabular-nums; }
+        .ticker small { display: block; color: var(--text-dim); font-size: 0.75rem; margin-top: 0.3rem; }
+
+        /* GLOSSARY */
+        .gloss-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0.8rem; }
+        .gloss-item {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 8px;
+            padding: 1rem 1.2rem; transition: border-color 0.2s;
+        }
+        .gloss-item:hover { border-color: var(--purple-deep); }
+        .gloss-item dt { color: var(--purple-soft); font-weight: 700; font-size: 0.95rem; margin-bottom: 0.3rem; }
+        .gloss-item dd { color: var(--text-dim); font-size: 0.85rem; margin: 0; }
+
+        /* MYTH CARD */
+        .myth { background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px; padding: 1.5rem; margin-bottom: 1rem; }
+        .myth-false { color: var(--danger); font-weight: 700; font-size: 0.95rem; margin-bottom: 0.4rem; }
+        .myth-true { color: var(--green, #22c55e); font-weight: 600; font-size: 0.92rem; }
+        .myth-true::before { content: '✓ '; }
+        :root { --green: #22c55e; }
+
+        /* CASE TIMELINE */
+        .case-card {
+            background: var(--bg-card); border: 1px solid var(--border); border-radius: 10px;
+            padding: 1.5rem; display: flex; gap: 1rem; align-items: flex-start; transition: 0.3s;
+        }
+        .case-card:hover { border-color: var(--purple-deep); transform: translateY(-2px); }
+        .case-year {
+            background: var(--purple-deep); color: #fff; font-weight: 800; font-size: 0.85rem;
+            padding: 0.4rem 0.7rem; border-radius: 5px; white-space: nowrap; flex-shrink: 0;
+        }
+        .case-card h4 { color: var(--text-bright); font-size: 1rem; margin-bottom: 0.3rem; }
+        .case-card p { color: var(--text-dim); font-size: 0.88rem; }
+        .cases-list { display: flex; flex-direction: column; gap: 0.8rem; }
+        @media(max-width:600px) {
+            .case-card { flex-direction: column; }
+            .gloss-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav" id="nav">
+    <div class="nav-inner">
+        <a href="#top" class="nav-brand"><img src="logo.jpg" alt="Fpsychos">Fpsychos</a>
+        <button class="burger" id="burger" aria-label="Menú"><span></span><span></span><span></span></button>
+        <ul class="nav-menu" id="navMenu">
+            <li><a href="#problema">La Realidad</a></li>
+            <li><a href="#redes">Sus Redes</a></li>
+            <li><a href="#casos">Casos Reales</a></li>
+            <li><a href="#perfil">Sus Cabezas</a></li>
+            <li><a href="#proteccion">Protege</a></li>
+            <li><a href="#ciber">Arsenal</a></li>
+            <li><a href="#opsec">OPSEC</a></li>
+            <li><a href="#ingenieria">Ing. Social</a></li>
+            <li><a href="#mitos">Mitos</a></li>
+            <li><a href="#glosario">Glosario</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#comunidad">Únete</a></li>
+        </ul>
+    </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero" id="top">
+    <img src="logo.jpg" alt="Fpsychos" class="hero-logo">
+    <h1>F<em>PSYCHOS</em></h1>
+    <p class="tagline">No somos espectadores. Somos la gente que se cansó de ver cómo pedófilos, maltratadores y depredadores campan a sus anchas mientras el sistema mira para otro lado. Si estás aquí es porque tú tampoco vas a quedarte de brazos cruzados.</p>
+    <div class="cta-row">
+        <a href="https://discord.gg/aWt5NNmFVg" target="_blank" class="btn btn-fill">Únete al Discord</a>
+        <a href="#ciber" class="btn btn-ghost">Explora el Arsenal</a>
+    </div>
+    <div class="ticker">
+        <p>Mientras llevas en esta página...</p>
+        <b id="tickerCount">0</b>
+        <p>archivos de CSAM se han reportado en el mundo</p>
+        <small>Basado en datos de NCMEC 2023: 104 millones de archivos en un año (~3.3 por segundo)</small>
+    </div>
+</section>
+
+<!-- STATS -->
+<div class="stats fi">
+    <div class="stat"><b>650M+</b><span>Mujeres sufrieron violencia sexual en su infancia (UNICEF, 2024)</span></div>
+    <div class="stat"><b>36.2M</b><span>Reportes de CSAM recibidos por NCMEC solo en 2023</span></div>
+    <div class="stat"><b>90%</b><span>De las víctimas conocían a su agresor (CDC / Dept. de Justicia EE.UU.)</span></div>
+    <div class="stat"><b>2.5%</b><span>De las agresiones sexuales acaba en cárcel (RAINN / FBI / BJS)</span></div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ===================== LA REALIDAD ===================== -->
+<section id="problema" class="fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">La Realidad</h2>
+    <p class="ssub">Esto no es un documental que ves y olvidas. Esto está pasando ahora mismo mientras lees esto. Millones de víctimas, redes organizadas, y un sistema que se mueve demasiado despacio.</p>
+
+    <div class="grid g2">
+        <div class="card">
+            <div class="ci">👁</div>
+            <h3>Explotación Sexual Infantil</h3>
+            <p>La producción y distribución de material de abuso sexual infantil (CSAM) ha explotado con Internet. No hablamos de casos aislados: hablamos de redes organizadas con miles de miembros operando en la dark web, Telegram, foros cifrados y plataformas de mensajería que tardan meses en actuar.</p>
+            <ul>
+                <li>NCMEC recibió 36.2 millones de reportes (más de 104 millones de archivos) en 2023</li>
+                <li>El grooming se mueve a juegos online: Roblox, Fortnite, Minecraft — donde los niños están</li>
+                <li>La sextorsión financiera a menores pasó de 139 reportes en 2021 a más de 36.000 en 2024 (NCMEC)</li>
+                <li>Los reportes de captación online (enticement) superaron los 546.000 en 2024, un +192% respecto a 2023</li>
+                <li>Muchos operan durante años sin ser detectados porque sus víctimas tienen miedo</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🐾</div>
+            <h3>Tortura Animal</h3>
+            <p>Existen redes dedicadas exclusivamente a grabar y vender vídeos de tortura animal. No es algo marginal: hay canales de Telegram con miles de seguidores compartiendo este contenido como si fuera entretenimiento. El «crush fetish» es una de las formas más retorcidas, pero hay más.</p>
+            <ul>
+                <li>El FBI lo clasifica como delito grave (Categoría A) desde 2016 por su vínculo directo con la violencia humana</li>
+                <li>Estudios de la MSPCA y Northeastern University demuestran que los maltratadores de animales tienen 5 veces más probabilidades de cometer delitos violentos contra personas</li>
+                <li>Las peleas organizadas de perros y gallos mueven millones en apuestas ilegales</li>
+                <li>Muchos asesinos seriales empezaron torturando animales de pequeños: Dahmer, Bundy, Berkowitz</li>
+                <li>Los vídeos se monetizan en plataformas de pago privadas</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">⛓</div>
+            <h3>Trata de Personas</h3>
+            <p>50 millones de personas viven en situación de esclavitud moderna según la OIT, Walk Free y la OIM (27.6M en trabajo forzoso y 22M en matrimonio forzoso). Solo el trabajo forzoso genera 236 mil millones de dólares anuales en beneficios ilegales (OIT, 2024).</p>
+            <ul>
+                <li>Las víctimas son captadas mediante engaño, deuda forzada, coacción o directamente secuestro</li>
+                <li>Las redes usan plataformas legítimas para reclutar: anuncios de empleo falsos, redes sociales</li>
+                <li>En Europa, menores migrantes no acompañados desaparecen cada año de centros de acogida</li>
+                <li>El turismo sexual infantil sigue activo en múltiples países del sudeste asiático y Latinoamérica</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">💀</div>
+            <h3>Gore y Comunidades de Violencia</h3>
+            <p>Hay foros enteros dedicados a compartir vídeos de torturas reales, asesinatos, decapitaciones. No son rincones olvidados de Internet: tienen comunidades activas de miles de personas que consumen eso a diario y se desensibilizan progresivamente.</p>
+            <ul>
+                <li>El consumo habitual de este contenido erosiona la empatía — hay estudios que lo demuestran</li>
+                <li>Muchas de estas comunidades se solapan con redes de pedofilia y maltrato animal</li>
+                <li>Algunos miembros pasan de consumidores a productores — es una escalada documentada</li>
+                <li>Las plataformas tardan demasiado en actuar, o directamente no actúan</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🌐</div>
+            <h3>La Dark Web</h3>
+            <p>Mercados enteros dedicados al CSAM más extremo (lo que las autoridades llaman «hurtcore»), servicios de explotación bajo demanda, subastas de víctimas. No es ciencia ficción, está a unos clicks de distancia para quien sabe buscar.</p>
+            <ul>
+                <li>Marketplaces como los ya desmantelados Boystown y Welcome to Video tenían cientos de miles de usuarios</li>
+                <li>Criptomonedas y mezcladores complican el rastreo de pagos</li>
+                <li>Las operaciones policiales internacionales logran desmantelar redes, pero aparecen otras</li>
+                <li>La colaboración ciudadana ha sido clave en varios de los golpes más importantes</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">📱</div>
+            <h3>Las Plataformas que Usan tus Hijos</h3>
+            <p>Los depredadores no están en un callejón oscuro. Están en TikTok, en Instagram, en Discord, en Roblox, en el Snapchat de tu hijo. Se adaptan, usan el lenguaje de los chavales, se hacen pasar por otros menores. Son pacientes y metódicos.</p>
+            <ul>
+                <li>Empiezan con halagos, regalos virtuales, skins de juegos. Luego piden fotos «de confianza»</li>
+                <li>Aíslan al menor de su entorno: «esto es nuestro secreto», «tus padres no lo entenderían»</li>
+                <li>Los live streams se explotan para abusos en tiempo real pagados por espectadores</li>
+                <li>Menores comparten su colegio, su barrio, su cara sin ser conscientes de lo que están regalando</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="quote">
+        «El mayor aliado del depredador no es la tecnología. Es el silencio de la gente que sabe y no hace nada.»
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== CÓMO OPERAN SUS REDES ===================== -->
+<div class="alt-bg" id="redes">
+<div class="inner fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Cómo Operan sus Redes</h2>
+    <p class="ssub">No son lobos solitarios. La mayoría funciona dentro de estructuras organizadas con jerarquías claras, sistemas de acceso y reglas internas. Conocer su estructura es el primer paso para desmantelarlas.</p>
+
+    <div class="grid g2x2">
+        <div class="card">
+            <div class="ci">👑</div>
+            <h3>Jerarquía Interna</h3>
+            <p>Las redes de explotación funcionan como organizaciones piramidales:</p>
+            <ul>
+                <li><strong>Administradores:</strong> Crean y mantienen las plataformas. Son los más difíciles de identificar porque rara vez interactúan directamente</li>
+                <li><strong>Moderadores:</strong> Controlan el acceso, verifican nuevos miembros, eliminan «impostores». Son la primera línea de defensa de la red</li>
+                <li><strong>Productores:</strong> Los que crean material original. Tienen el estatus más alto porque aportan contenido «nuevo»</li>
+                <li><strong>Distribuidores:</strong> Se encargan de compartir y monetizar el material a través de múltiples plataformas</li>
+                <li><strong>Consumidores:</strong> La base de la pirámide. Pagan, intercambian o simplemente consumen. Son los más fáciles de identificar</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🔑</div>
+            <h3>Sistemas de Acceso y Confianza</h3>
+            <ul>
+                <li><strong>Invitación cerrada:</strong> Solo entras si un miembro existente te avala. Esto dificulta la infiltración</li>
+                <li><strong>«Peaje» de entrada:</strong> Muchas redes exigen material original nuevo como precio de admisión. Esto vincula al nuevo miembro y lo convierte en cómplice</li>
+                <li><strong>Verificación gradual:</strong> Acceso a más contenido solo después de demostrar «lealtad» con contribuciones propias</li>
+                <li><strong>Canales estratificados:</strong> Contenido dividido en niveles de acceso. Lo más extremo solo para los más «confiables»</li>
+                <li><strong>Dead drops digitales:</strong> Enlaces temporales, archivos que se autodestruyen, canales que rotan</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">💰</div>
+            <h3>Monetización</h3>
+            <ul>
+                <li><strong>Criptomonedas:</strong> Bitcoin, Monero (preferido por su privacidad), con mezcladores para borrar el rastro</li>
+                <li><strong>Suscripciones privadas:</strong> Sitios de pago con contenido «exclusivo» detrás de muros de pago</li>
+                <li><strong>Live streaming bajo demanda:</strong> El espectador paga en tiempo real por abusos que ocurren al momento</li>
+                <li><strong>Extorsión:</strong> Chantajean a las víctimas o a otros miembros con la información que tienen de ellos</li>
+                <li><strong>Trueque de material:</strong> En muchas redes no se usa dinero sino intercambio de contenido como moneda</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🔄</div>
+            <h3>Migración y Resiliencia</h3>
+            <p>Cuando les cierran una plataforma:</p>
+            <ul>
+                <li><strong>Migración coordinada:</strong> Tienen canales de respaldo y protocolos para mover la comunidad a otro servidor en horas</li>
+                <li><strong>Infraestructura distribuida:</strong> No dependen de un solo servidor. Usan espejos, nodos Tor, servicios descentralizados</li>
+                <li><strong>De Telegram a Matrix a Session:</strong> Van saltando entre plataformas según cuál tenga menor moderación en ese momento</li>
+                <li><strong>Dominios desechables:</strong> Registran decenas de dominios a la vez con datos falsos para ir rotando</li>
+                <li><strong>Comunicaciones redundantes:</strong> PGP, canales cifrados, mensajería efímera — siempre con respaldo</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ===================== CASOS REALES ===================== -->
+<section id="casos" class="fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Casos Reales: Se Puede Ganar</h2>
+    <p class="ssub">Cada uno de estos casos demuestra que estas redes no son invencibles. Muchos empezaron con un reporte ciudadano, una investigación amateur o un error del agresor. Se les puede encontrar, y se les encuentra.</p>
+
+    <div class="cases-list">
+        <div class="case-card">
+            <span class="case-year">2014</span>
+            <div>
+                <h4>Don't F**k with Cats — Luka Magnotta</h4>
+                <p>Un grupo de ciudadanos anónimos de Internet rastreó a un individuo que publicaba vídeos de tortura animal en YouTube. Usando OSINT básico — geolocalización de fondos de vídeo, análisis de metadatos, rastreo de cuentas — lo identificaron antes que la policía. Magnotta escaló al asesinato, fue capturado y condenado a cadena perpetua. La investigación ciudadana fue clave.</p>
+            </div>
+        </div>
+        <div class="case-card">
+            <span class="case-year">2018</span>
+            <div>
+                <h4>Welcome to Video — Jong Woo Son</h4>
+                <p>El mayor sitio de CSAM de la dark web con más de 250.000 vídeos y 1.3 millones de descargas. Fue desmantelado gracias al rastreo de transacciones en Bitcoin. El administrador, un surcoreano de 23 años, fue identificado cuando una transacción se vinculó a un exchange con verificación de identidad. 337 arrestos en 38 países.</p>
+            </div>
+        </div>
+        <div class="case-card">
+            <span class="case-year">2019</span>
+            <div>
+                <h4>Peter Scully — El caso más extremo</h4>
+                <p>Australiano que operaba en Filipinas produciendo el CSAM más extremo jamás documentado (hurtcore). Fue rastreado por investigadores que cruzaron datos de pagos online con direcciones IP. Condenado a cadena perpetua en Filipinas. Su caso provocó cambios en la legislación de varios países.</p>
+            </div>
+        </div>
+        <div class="case-card">
+            <span class="case-year">2021</span>
+            <div>
+                <h4>Operación Boystown — Europol</h4>
+                <p>Desmantelamiento del foro de CSAM más grande de la dark web con más de 400.000 miembros. Cuatro administradores arrestados en Alemania y Paraguay. La operación duró meses de infiltración. Los administradores cometieron errores de OPSEC: reutilización de emails, conexiones sin Tor, pagos rastreables.</p>
+            </div>
+        </div>
+        <div class="case-card">
+            <span class="case-year">2022</span>
+            <div>
+                <h4>Operación Turquesa V — INTERPOL</h4>
+                <p>Operación global que identificó a más de 670 sospechosos y rescató a 230 víctimas en 28 países. Usaron tecnología de reconocimiento de víctimas (ICSE Database) para vincular imágenes con ubicaciones reales. Muchas identificaciones se lograron gracias a detalles en el fondo de las imágenes.</p>
+            </div>
+        </div>
+        <div class="case-card">
+            <span class="case-year">2023</span>
+            <div>
+                <h4>Desmantelamiento de redes de tortura animal en Telegram</h4>
+                <p>Múltiples operaciones coordinadas en España (Guardia Civil), Reino Unido y Australia cerraron canales de Telegram con miles de miembros que compartían vídeos de tortura animal. Las denuncias ciudadanas masivas a Telegram y a las autoridades forzaron la actuación. Decenas de arrestos.</p>
+            </div>
+        </div>
+        <div class="case-card">
+            <span class="case-year">2024</span>
+            <div>
+                <h4>Operación Cumberland — Europol</h4>
+                <p>Red internacional que generaba CSAM con IA para distribuirlo. Arrestaron a 25 sospechosos en 19 países. El caso sentó precedente: el CSAM generado por IA también es un delito perseguible. El líder fue identificado a través de errores en la anonimización de sus pagos en criptomonedas.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="box-info mt2">
+        <h4>Patrón común</h4>
+        <p>En casi todos los casos, el factor decisivo fue un <strong>error de OPSEC</strong> del agresor: un email reutilizado, una conexión sin VPN, un pago rastreable, un detalle visible en una foto. Por eso insistimos tanto en conocer sus herramientas y hábitos: porque cometen errores, y cuando los cometen, ahí es donde entramos.</p>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== PERFIL PSICOLÓGICO ===================== -->
+<div class="alt-bg" id="perfil">
+<div class="inner fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Dentro de sus Cabezas</h2>
+    <p class="ssub">Entender cómo piensan no es empatizar con ellos. Es tener armas para identificarlos, predecir sus movimientos y usar sus propias debilidades en su contra. Todo lo que sigue está respaldado por investigación criminológica y psicológica publicada.</p>
+
+    <div class="grid g2">
+        <div class="card">
+            <div class="ci">🎭</div>
+            <h3>El Antisocial y el Narcisista</h3>
+            <p>La mayoría de los depredadores que operan de forma activa y organizada puntúan alto en <strong>Trastorno Antisocial de la Personalidad (TAP)</strong> y/o <strong>Narcisismo Patológico</strong>. Esto significa:</p>
+            <ul>
+                <li><strong>Ausencia real de empatía</strong> — no es que la repriman, es que no la sienten. Las víctimas son objetos</li>
+                <li><strong>Encanto superficial</strong> — suelen ser carismáticos en las primeras interacciones, saben exactamente qué quieres oír</li>
+                <li><strong>Mentira patológica</strong> — mienten con una naturalidad que engaña incluso a profesionales</li>
+                <li><strong>Grandiosidad</strong> — se consideran superiores, más listos que la policía, más listos que tú</li>
+                <li><strong>Desprecio por las normas</strong> — no es que no las conozcan, es que creen que no les aplican</li>
+                <li><strong>Necesidad de control</strong> — el abuso no es solo sexual o violento, es sobre poder y dominación</li>
+            </ul>
+            <p class="mt1"><strong>Dato:</strong> En el PCL-R (escala de psicopatía de Hare), los depredadores sexuales seriales puntúan de media 25-30 sobre 40. La población general puntúa 4-5.</p>
+        </div>
+        <div class="card">
+            <div class="ci">😶</div>
+            <h3>El Aislado y el Socialmente Incompetente</h3>
+            <p>No todos los depredadores son el estereotipo del psicópata carismático. Hay un perfil igualmente peligroso y más común online:</p>
+            <ul>
+                <li><strong>Ansiedad social severa</strong> — incapaces de mantener relaciones normales con adultos, recurren a víctimas vulnerables</li>
+                <li><strong>Aislamiento progresivo</strong> — se encierran en comunidades online donde sus desviaciones se normalizan. «Todos aquí lo hacen»</li>
+                <li><strong>Déficit de habilidades sociales</strong> — no logran relaciones recíprocas, así que buscan a quienes no pueden decir que no</li>
+                <li><strong>Fantasías compensatorias</strong> — online se reinventan como personas poderosas, controladoras. En la vida real suelen ser invisibles</li>
+                <li><strong>Dependencia de la comunidad tóxica</strong> — es su único círculo social, lo que los convierte en más radicales con el tiempo</li>
+            </ul>
+            <p class="mt1"><strong>Punto débil:</strong> Este perfil es el más vulnerable emocionalmente. Necesitan la validación del grupo, y sin ella se derrumban. Cuando se les aísla de su comunidad, muchos colapsan psicológicamente.</p>
+        </div>
+        <div class="card">
+            <div class="ci">🌑</div>
+            <h3>Depresión, Vacío y Distorsiones Cognitivas</h3>
+            <p>Muchos depredadores viven con una depresión crónica de fondo que nunca han tratado. Eso no los justifica ni un milímetro, pero explica patrones:</p>
+            <ul>
+                <li><strong>Sensación de vacío permanente</strong> — intentan llenar ese hueco con conductas cada vez más extremas, como un adicto que necesita más dosis</li>
+                <li><strong>Anhedonia</strong> — la incapacidad de sentir placer con cosas normales les empuja a buscar estímulos cada vez más extremos</li>
+                <li><strong>Distorsiones cognitivas</strong> que se autorefuerzan:
+                    <ul>
+                        <li>«El menor/animal no sufre realmente»</li>
+                        <li>«Es natural, siempre ha existido»</li>
+                        <li>«Yo también fui víctima, así que tengo derecho»</li>
+                        <li>«Si no lo hiciera yo, lo haría otro»</li>
+                    </ul>
+                </li>
+                <li><strong>Proyección</strong> — culpan a la víctima del abuso para mantener su autoimagen</li>
+                <li><strong>Minimización</strong> — «solo miro, no toco» como si consumir CSAM no fuera financiar abusos reales</li>
+            </ul>
+            <p class="mt1"><strong>Punto débil:</strong> Las distorsiones cognitivas son su escudo mental. Si se las desmontas (especialmente en público), el peso de lo que han hecho les aplasta.</p>
+        </div>
+        <div class="card">
+            <div class="ci">🔄</div>
+            <h3>El Ciclo del Depredador</h3>
+            <p>No actúan al azar. Siguen un ciclo obsesivo-compulsivo documentado que se repite y escala:</p>
+            <ul>
+                <li><strong>1. Fantasía</strong> — ideación obsesiva. Pasan horas fantaseando con el acto. Es lo primero que les viene a la cabeza y lo último antes de dormir</li>
+                <li><strong>2. Planificación</strong> — seleccionan la víctima, estudian su entorno, buscan puntos de acceso. Son metódicos</li>
+                <li><strong>3. Grooming / Acercamiento</strong> — ganan confianza lentamente. Semanas, meses. Son pacientes porque la recompensa les compensa</li>
+                <li><strong>4. Ejecución</strong> — el abuso en sí. Frecuentemente lo graban, tanto para consumo propio como para intercambiar en redes</li>
+                <li><strong>5. Racionalización</strong> — se autoconvencen de que no fue para tanto, de que la víctima «quería», de que nadie salió herido</li>
+                <li><strong>6. Periodo de calma</strong> — culpa temporal (en algunos), que se disipa cuando la fantasía vuelve. Y siempre vuelve</li>
+                <li><strong>7. Escalada</strong> — cada ciclo necesita más. Más extremo, más víctimas, más riesgo. Hasta que son detenidos o alguien los para</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">📉</div>
+            <h3>Antecedentes y Patrones de Vida</h3>
+            <p>Las investigaciones identifican factores comunes en sus historias de vida. No determinantes, pero sí patrones que se repiten con una frecuencia preocupante:</p>
+            <ul>
+                <li><strong>Abuso sexual en su propia infancia</strong> — el metaanálisis de Jespersen, Lalumière y Seto (2009) muestra que los agresores sexuales tienen una probabilidad 3.36 veces mayor de haber sufrido abuso sexual infantil (entre un 20% y un 50% según los estudios). Esto no justifica NADA, pero explica el patrón</li>
+                <li><strong>Exposición temprana a pornografía</strong> — muchos tuvieron acceso a material explícito antes de los 10 años</li>
+                <li><strong>Entorno familiar disfuncional</strong> — negligencia, violencia doméstica, padres ausentes o abusivos</li>
+                <li><strong>Fracaso social y laboral</strong> — muchos tienen trabajos inestables o están desempleados, viven con sus padres siendo adultos</li>
+                <li><strong>Consumo problemático de sustancias</strong> — alcohol, drogas, que desinhibien y agravan las conductas</li>
+                <li><strong>Inicio del consumo online que escala</strong> — empiezan con material «softcore», van subiendo la intensidad, terminan en hurtcore o agresión directa</li>
+                <li><strong>Coleccionismo compulsivo</strong> — acumulan terabytes de material. No es solo por consumo: es por estatus dentro de sus comunidades</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🕳</div>
+            <h3>Sus Debilidades</h3>
+            <p>Conocer sus puntos débiles es fundamental. No son los genios criminales que se creen:</p>
+            <ul>
+                <li><strong>Ego</strong> — su narcisismo les lleva a cometer errores. Presumen de lo que hacen, comparten demasiado, subestiman a quien les investiga</li>
+                <li><strong>Necesidad de comunidad</strong> — sin el grupo que valida sus conductas, muchos pierden la motivación. Aislarlos funciona</li>
+                <li><strong>Hábitos digitales</strong> — reutilizan nicknames, emails, fotos de perfil. Dejan un rastro digital que conecta sus identidades</li>
+                <li><strong>Paranoia</strong> — muchos viven con un miedo constante a ser descubiertos. Esa ansiedad les hace cometer errores y se puede amplificar</li>
+                <li><strong>Fragilidad emocional</strong> — bajo la fachada, son inseguros. La confrontación real (no amenazas vacías) los desestabiliza</li>
+                <li><strong>Dependencia de la rutina</strong> — tienen horarios, plataformas favoritas, patrones de conexión predecibles</li>
+                <li><strong>Confianza excesiva en el anonimato</strong> — creen que una VPN y Tor les hacen intocables. No es así, y lo demostraremos</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="box-info mt2">
+        <h4>Fuentes</h4>
+        <p>Seto (2008), Babchishin et al. (2015), Hare PCL-R Manual, estudios del FBI Behavioral Analysis Unit, investigaciones de INTERPOL ICSE, publicaciones de la European Online Grooming Project. No nos inventamos nada: esto es lo que dice la ciencia.</p>
+    </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ===================== PROTECCIÓN ===================== -->
+<section id="proteccion" class="fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Protege a los Vulnerables</h2>
+    <p class="ssub">Si tienes hijos, sobrinos, alumnos, o simplemente te importa un menor cerca de ti: esto es lo mínimo que deberías saber y hacer.</p>
+
+    <div class="grid g3">
+        <div class="card">
+            <div class="ci">👨‍👩‍👧</div>
+            <h3>Para Padres</h3>
+            <ul>
+                <li>Habla con tus hijos sobre lo que hacen online. Sin juicio, sin castigo. Si te tienen miedo, no te contarán nada</li>
+                <li>Conoce las plataformas que usan. Si no sabes qué es Discord o Roblox, aprende</li>
+                <li>Los controles parentales ayudan, pero no sustituyen la comunicación</li>
+                <li>Enséñales que NUNCA deben enviar fotos íntimas a nadie. A NADIE</li>
+                <li>Un «amigo online» que pide secretos es una señal de alarma máxima</li>
+                <li>Revisa periódicamente las listas de amigos, pero sin invadir su confianza</li>
+                <li>Si un adulto les da regalos o dinero, PREGUNTA</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🚩</div>
+            <h3>Señales de Alarma</h3>
+            <ul>
+                <li>Cambio brusco de comportamiento: retraimiento, agresividad, miedo repentino</li>
+                <li>Oculta su actividad online, cambia de pantalla cuando te acercas</li>
+                <li>Recibe regalos de «amigos» que tú no conoces</li>
+                <li>Muestra conocimientos sexuales que no debería tener a su edad</li>
+                <li>Problemas de sueño, pesadillas recurrentes</li>
+                <li>Autolesiones, marcas que intenta ocultar</li>
+                <li>Miedo a quedarse a solas con determinadas personas</li>
+                <li>Regresión a comportamientos infantiles (enuresis, chuparse el dedo)</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🐕</div>
+            <h3>Protección Animal</h3>
+            <ul>
+                <li>Si ves maltrato, graba pruebas de forma discreta y segura</li>
+                <li>Denuncia canales de Telegram/YouTube que difundan tortura animal</li>
+                <li>Contacta con protectoras locales, policía o SEPRONA (España)</li>
+                <li>El maltrato animal es delito en la mayoría de países. Exige que se aplique</li>
+                <li>No compres animales de criaderos ilegales ni fomentes la cría no regulada</li>
+                <li>Si un vecino maltrata a su animal, no mires para otro lado</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🔐</div>
+            <h3>Privacidad Digital Mínima</h3>
+            <ul>
+                <li>No usar nombre real como username</li>
+                <li>No compartir ubicación, colegio ni rutinas</li>
+                <li>Perfiles privados siempre</li>
+                <li>No aceptar solicitudes de desconocidos</li>
+                <li>Desactivar geolocalización de fotos</li>
+                <li>Contraseñas fuertes + 2FA en todo</li>
+                <li>No reutilizar contraseñas entre servicios</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🆘</div>
+            <h3>Si Eres Víctima</h3>
+            <ul>
+                <li><strong>No es tu culpa.</strong> Nunca lo es. Bajo ninguna circunstancia</li>
+                <li>Habla con alguien de confianza. No te quedes solo/a con esto</li>
+                <li>Guarda todas las pruebas: capturas, mensajes, perfiles. No borres nada</li>
+                <li>España: 116 111 (infancia) / 024 (conducta suicida) / 112 (emergencias)</li>
+                <li>Fundación ANAR, Save the Children ofrecen apoyo gratuito</li>
+                <li>También puedes escribirnos: <a href="mailto:fuckpsychos@gmail.com">fuckpsychos@gmail.com</a></li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🏫</div>
+            <h3>Para Educadores</h3>
+            <ul>
+                <li>Integra la prevención del abuso en el currículo</li>
+                <li>Crea espacios seguros donde los alumnos puedan hablar sin miedo</li>
+                <li>Forma al personal en indicadores de abuso</li>
+                <li>Si sospechas algo, denuncia. Es tu obligación legal y moral</li>
+                <li>Colabora con las familias en la prevención</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== ARSENAL CIBER ===================== -->
+<div class="alt-bg" id="ciber">
+<div class="inner fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Arsenal Digital</h2>
+    <p class="ssub">Herramientas que existen y que se usan en investigaciones. Aquí explicamos qué hace cada una. Si quieres aprender a usarlas para nuestro objetivo, <a href="https://discord.gg/aWt5NNmFVg" target="_blank">contacta con nosotros</a>.</p>
+
+    <div class="box-info mb2">
+        <h4>Aviso</h4>
+        <p>Listamos estas herramientas con fines educativos y de concienciación. No explicamos cómo instalarlas ni ejecutar ataques. Si quieres formarte en su uso para colaborar con Fpsychos, entra al Discord o escríbenos. Necesitamos saber que estás de nuestro lado antes de compartir conocimiento sensible.</p>
+    </div>
+
+    <!-- OSINT -->
+    <h3 class="stitle" style="font-size:1.3rem;">🔍 OSINT — Inteligencia de Fuentes Abiertas</h3>
+    <p class="ssub">Recopilar información pública sobre un objetivo. No necesitas hackear nada: la gente deja más rastro del que cree.</p>
+    <div class="grid g2 mb2">
+        <div class="card">
+            <h3>Sherlock</h3>
+            <p>Busca un username en más de 400 plataformas simultáneamente. Si un depredador usa el mismo nick en Twitter que en un foro turbio, Sherlock lo conecta en segundos.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">CLI</span> <span class="tool-tag">Open Source</span>
+        </div>
+        <div class="card">
+            <h3>Maltego</h3>
+            <p>Herramienta de análisis de relaciones. Crea un grafo visual que conecta personas, emails, dominios, IPs, cuentas de redes sociales. Permite ver la red completa detrás de un solo dato.</p>
+            <span class="tool-tag">GUI</span> <span class="tool-tag">Grafo Visual</span> <span class="tool-tag">Community Edition Gratis</span>
+        </div>
+        <div class="card">
+            <h3>SpiderFoot</h3>
+            <p>Automatización de OSINT. Le das un nombre, email, IP, dominio o teléfono y recoge automáticamente toda la información pública disponible de cientos de fuentes. Genera informes completos.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">Web UI</span> <span class="tool-tag">Open Source</span>
+        </div>
+        <div class="card">
+            <h3>theHarvester</h3>
+            <p>Recopila emails, nombres, subdominios, IPs y URLs relacionados con un dominio o nombre. Ideal para mapear la infraestructura digital de alguien.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">CLI</span> <span class="tool-tag">Kali Linux</span>
+        </div>
+        <div class="card">
+            <h3>Recon-ng</h3>
+            <p>Framework completo de reconocimiento web. Modular, con decenas de módulos para buscar en bases de datos públicas, redes sociales, registros DNS, geolocalización y más.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">Framework Modular</span>
+        </div>
+        <div class="card">
+            <h3>Holehe</h3>
+            <p>Verifica si un email está registrado en más de 120 servicios (Twitter, Instagram, Spotify, Adobe, etc.) sin que el dueño lo sepa. Perfecto para mapear las cuentas de alguien a partir de un solo correo.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">CLI</span> <span class="tool-tag">Sigiloso</span>
+        </div>
+        <div class="card">
+            <h3>Maigret</h3>
+            <p>Similar a Sherlock pero más potente: busca un username en más de 2500 sitios, genera informes en HTML/PDF, y puede parsear la información de los perfiles encontrados automáticamente.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">CLI</span> <span class="tool-tag">+2500 sitios</span>
+        </div>
+        <div class="card">
+            <h3>GHunt</h3>
+            <p>Extrae información vinculada a una cuenta de Google: nombre, foto de perfil, reseñas de Google Maps, canales de YouTube, ubicaciones, calendario. Todo público, todo conectado.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">CLI</span> <span class="tool-tag">Google Ecosystem</span>
+        </div>
+    </div>
+
+    <!-- GEOLOCALIZACIÓN Y TRACKING -->
+    <h3 class="stitle" style="font-size:1.3rem;">📍 Geolocalización y Tracking</h3>
+    <p class="ssub">Herramientas para obtener ubicaciones y rastrear la presencia digital de un objetivo.</p>
+    <div class="grid g2 mb2">
+        <div class="card">
+            <h3>Seeker</h3>
+            <p>Genera una página señuelo (phishing de geolocalización) que, cuando el objetivo la abre, captura su ubicación GPS precisa, tipo de dispositivo, navegador, IP y más. Es la herramienta que nombras cuando necesitas saber exactamente dónde está alguien.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">Ngrok/Serveo</span> <span class="tool-tag">Preciso</span>
+        </div>
+        <div class="card">
+            <h3>IPLogger / Grabify</h3>
+            <p>Generadores de enlaces de rastreo. Cuando alguien hace click en el enlace, registra su IP, ubicación aproximada, ISP, dispositivo, sistema operativo y navegador. Sencillo pero efectivo.</p>
+            <span class="tool-tag">Web</span> <span class="tool-tag">Sin instalación</span>
+        </div>
+        <div class="card">
+            <h3>Creepy</h3>
+            <p>Extrae información de geolocalización de fotos y publicaciones en redes sociales. Si alguien sube fotos con metadatos EXIF activos, Creepy mapea todos los lugares donde han estado.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">GUI</span> <span class="tool-tag">Redes Sociales</span>
+        </div>
+        <div class="card">
+            <h3>Shodan</h3>
+            <p>El Google de los dispositivos conectados. Busca cámaras IP, servidores, routers, IoT — todo lo que esté expuesto a Internet. Encuentra webcams abiertas, servidores mal configurados y puntos de entrada.</p>
+            <span class="tool-tag">Web + API</span> <span class="tool-tag">IoT</span> <span class="tool-tag">CLI disponible</span>
+        </div>
+    </div>
+
+    <!-- ANÁLISIS Y FOOTPRINTING -->
+    <h3 class="stitle" style="font-size:1.3rem;">🕵 Análisis y Footprinting</h3>
+    <p class="ssub">Mapeo completo de la presencia digital de un objetivo.</p>
+    <div class="grid g2 mb2">
+        <div class="card">
+            <h3>OSINT Framework</h3>
+            <p>No es una herramienta sino un mapa interactivo de TODAS las herramientas OSINT disponibles, organizadas por categoría: usernames, emails, IPs, dominios, redes sociales, imágenes, dark web, etc.</p>
+            <span class="tool-tag">Web</span> <span class="tool-tag">osintframework.com</span>
+        </div>
+        <div class="card">
+            <h3>ExifTool</h3>
+            <p>Lee y edita metadatos de imágenes y archivos. Fecha, hora, coordenadas GPS, modelo de cámara/teléfono, software usado. Los depredadores olvidan borrar estos datos más de lo que crees.</p>
+            <span class="tool-tag">CLI</span> <span class="tool-tag">Multiplataforma</span>
+        </div>
+        <div class="card">
+            <h3>Wayback Machine</h3>
+            <p>Archivo histórico de Internet. Puedes ver versiones antiguas de cualquier web, incluidas las que ya no existen. Útil para recuperar información que alguien intentó borrar.</p>
+            <span class="tool-tag">Web</span> <span class="tool-tag">web.archive.org</span>
+        </div>
+        <div class="card">
+            <h3>TinEye / Yandex Images</h3>
+            <p>Búsqueda inversa de imágenes. Si tienes la foto de perfil de un depredador, puedes rastrear dónde más la ha usado. Yandex suele dar mejores resultados que Google para rostros.</p>
+            <span class="tool-tag">Web</span> <span class="tool-tag">Gratuito</span>
+        </div>
+        <div class="card">
+            <h3>DNSDumpster / SecurityTrails</h3>
+            <p>Mapa completo de la infraestructura DNS de un dominio: subdominios, registros MX, historial de IPs, tecnologías usadas. Desvela la infraestructura detrás de una web.</p>
+            <span class="tool-tag">Web</span> <span class="tool-tag">DNS</span>
+        </div>
+        <div class="card">
+            <h3>Phoneinfoga</h3>
+            <p>Escanea un número de teléfono y busca información vinculada: operador, país, línea fija/móvil, y posible presencia en bases de datos públicas y redes sociales.</p>
+            <span class="tool-tag">Go</span> <span class="tool-tag">CLI + Web UI</span>
+        </div>
+    </div>
+
+    <!-- ESTRÉS DE RED -->
+    <h3 class="stitle" style="font-size:1.3rem;">⚡ Herramientas de Estrés de Red</h3>
+    <p class="ssub">Herramientas que prueban la resistencia de una red o servicio bajo carga. Existen y se usan. Si quieres saber más, ya sabes dónde encontrarnos.</p>
+    <div class="grid g2 mb2">
+        <div class="card">
+            <h3>MHDDoS</h3>
+            <p>Framework con más de 56 métodos de ataque de denegación de servicio integrados. Soporta proxies, múltiples capas (L4/L7), bypass de protecciones y ejecución multihilo. Es uno de los más completos que existen en código abierto.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">Multi-método</span> <span class="tool-tag">L4/L7</span>
+        </div>
+        <div class="card">
+            <h3>LOIC / HOIC</h3>
+            <p><strong>Low Orbit Ion Cannon / High Orbit Ion Cannon.</strong> Clásicos del estrés de red. LOIC envía floods TCP/UDP/HTTP. HOIC es su versión más avanzada con booster scripts que permiten personalizar las peticiones y evadir algunas protecciones básicas.</p>
+            <span class="tool-tag">Windows/Linux</span> <span class="tool-tag">GUI</span>
+        </div>
+        <div class="card">
+            <h3>Slowloris</h3>
+            <p>Ataque de denegación de servicio de baja tasa. En vez de inundar con tráfico, mantiene cientos de conexiones HTTP abiertas simultáneamente, agotando el pool de conexiones del servidor. Muy difícil de detectar por firewalls convencionales.</p>
+            <span class="tool-tag">Python/Perl</span> <span class="tool-tag">Low & Slow</span>
+        </div>
+        <div class="card">
+            <h3>GoldenEye</h3>
+            <p>Herramienta de estrés HTTP que usa KeepAlive con headers y cache busters aleatorios para esquivar cachés y CDNs. Eficaz contra servidores web que confían en su capa de cache.</p>
+            <span class="tool-tag">Python</span> <span class="tool-tag">HTTP L7</span>
+        </div>
+        <div class="card">
+            <h3>Xerxes</h3>
+            <p>Herramienta escrita en C, extremadamente ligera y rápida. Abre miles de conexiones simultáneas al objetivo. Su simplicidad es su fuerza: un solo host puede generar presión significativa.</p>
+            <span class="tool-tag">C</span> <span class="tool-tag">Ligero</span> <span class="tool-tag">Rápido</span>
+        </div>
+        <div class="card">
+            <h3>hping3</h3>
+            <p>Generador de paquetes TCP/IP a nivel de sistema. Permite crear paquetes personalizados con cualquier flag, tamaño, fragmentación. Se usa tanto para testing como para análisis de firewall y capacidades de red.</p>
+            <span class="tool-tag">CLI</span> <span class="tool-tag">Linux</span> <span class="tool-tag">Raw Packets</span>
+        </div>
+    </div>
+
+    <div class="box-info">
+        <h4>Contacta antes de actuar</h4>
+        <p>Estas herramientas existen y están disponibles públicamente, pero usarlas sin coordinación puede joder investigaciones en curso o meterte en problemas legales a ti. <strong>Escríbenos primero</strong> → <a href="https://discord.gg/aWt5NNmFVg" target="_blank">Discord</a> / <a href="mailto:fuckpsychos@gmail.com">fuckpsychos@gmail.com</a></p>
+    </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ===================== OPSEC ===================== -->
+<section id="opsec" class="fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">OPSEC — Tu Seguridad</h2>
+    <p class="ssub">Si vas a meterte con esta gente, lo primero es que no puedan llegar a ti. No seas el héroe que acaba doxxeado. Lee esto antes de hacer nada.</p>
+
+    <div class="acc">
+        <div class="acc-item">
+            <div class="acc-head">🌐 Navegación Segura <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <ul>
+                    <li><strong>VPN confiable y sin logs</strong> — Mullvad, ProtonVPN o IVPN. Olvídate de las VPN gratuitas: venden tus datos</li>
+                    <li><strong>Tor Browser</strong> para investigaciones sensibles. No es perfecto, pero añade capas</li>
+                    <li><strong>Nunca uses tu navegador habitual</strong> para nada relacionado con investigación</li>
+                    <li><strong>Deshabilita JavaScript</strong> cuando sea posible (NoScript). JS es un vector de deanonimización</li>
+                    <li><strong>No inicies sesión</strong> en ninguna cuenta personal mientras investigas</li>
+                    <li><strong>Máquina virtual dedicada</strong> (VirtualBox, VMware) o sistema live como Tails OS</li>
+                    <li><strong>Deshabilita WebRTC</strong> — puede filtrar tu IP real incluso con VPN activa</li>
+                    <li><strong>DNS cifrado</strong> — usa DoH/DoT (Cloudflare 1.1.1.1 o Quad9) para que tu ISP no vea tus consultas</li>
+                </ul>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">👤 Identidad y Cuentas <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <ul>
+                    <li><strong>Email desechable:</strong> ProtonMail o Tutanota con datos ficticios. Un correo nuevo para cada operación</li>
+                    <li><strong>Nunca uses tu nombre real</strong>, foto real, correo personal ni datos identificables</li>
+                    <li><strong>Username único y nuevo:</strong> No reutilices nicks que hayas usado en CUALQUIER otro sitio</li>
+                    <li><strong>Teléfono:</strong> VoIP o prepago sin vincular a tu identidad para verificaciones</li>
+                    <li><strong>Contraseñas únicas:</strong> KeePassXC o Bitwarden. Una contraseña diferente para cada cuenta</li>
+                    <li><strong>Fotos de perfil:</strong> Generadas por IA (thispersondoesnotexist.com). Nunca tu cara ni la de alguien real</li>
+                    <li><strong>Metadatos:</strong> Elimina EXIF de cualquier imagen que subas (ExifTool, MAT2)</li>
+                </ul>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">💻 Seguridad del Dispositivo <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <ul>
+                    <li><strong>Tails OS:</strong> Sistema operativo amnésico que arranca desde USB. Cuando lo apagas, no queda rastro</li>
+                    <li><strong>Whonix:</strong> SO diseñado para anonimato. Todo el tráfico pasa por Tor obligatoriamente</li>
+                    <li><strong>Qubes OS:</strong> Aislamiento por compartimentos. Cada actividad en una VM separada</li>
+                    <li><strong>Cifrado de disco completo:</strong> VeraCrypt (Windows) o LUKS (Linux). Sin excusas</li>
+                    <li><strong>Firewall configurado:</strong> Bloquea conexiones salientes que no sean necesarias</li>
+                    <li><strong>No descargues archivos</strong> de fuentes sospechosas — pueden ser malware o honeypots de las autoridades</li>
+                    <li><strong>Actualizaciones al día:</strong> Los exploits aprovechan vulnerabilidades conocidas y parcheadas</li>
+                </ul>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">📸 Manejo de Evidencia <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <ul>
+                    <li><strong>NUNCA descargues ni almacenes CSAM.</strong> Es ilegal en TODOS los países. Punto. Reporta la URL</li>
+                    <li><strong>Capturas de pantalla</strong> con fecha/hora visibles. ShareX o Greenshot con marca temporal</li>
+                    <li><strong>Hashes SHA256</strong> de tus capturas para demostrar que no han sido alteradas</li>
+                    <li><strong>Cadena de custodia:</strong> Documenta cuándo, cómo y dónde obtuviste cada prueba</li>
+                    <li><strong>Almacenamiento cifrado:</strong> Contenedor VeraCrypt dedicado para las pruebas</li>
+                    <li><strong>Archive.org / Archive.today:</strong> Para guardar instantáneas verificables de páginas web</li>
+                </ul>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">🤝 Protocolo de Equipo <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <ul>
+                    <li><strong>Nunca trabajes solo/a.</strong> Coordínate con el grupo en Discord</li>
+                    <li><strong>Roles definidos:</strong> Investigadores, documentadores, coordinadores. No todo el mundo tiene que estar en primera línea</li>
+                    <li><strong>Comunicación cifrada:</strong> Signal para lo más sensible. Canales privados en Discord para el día a día</li>
+                    <li><strong>Protocolo de emergencia:</strong> Si alguien es identificado por los objetivos, ten un plan de respuesta</li>
+                    <li><strong>Rotación:</strong> No expongas a la misma persona constantemente al contenido traumático</li>
+                    <li><strong>Salud mental:</strong> Esto pasa factura. Tomate descansos, habla con un profesional, es normal que te afecte</li>
+                </ul>
+            </div></div>
+        </div>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== INGENIERÍA SOCIAL ===================== -->
+<div class="alt-bg" id="ingenieria">
+<div class="inner fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Ingeniería Social</h2>
+    <p class="ssub">La ingeniería social es el arte de manipular a las personas para que revelen información. Los depredadores la usan contra sus víctimas. Nosotros la usamos contra ellos. Conoce las técnicas para detectarlas y, si es necesario, aplicarlas.</p>
+
+    <div class="grid g2x2">
+        <div class="card">
+            <div class="ci">🎣</div>
+            <h3>Técnicas que Ellos Usan (y que Debes Reconocer)</h3>
+            <ul>
+                <li><strong>Pretexting:</strong> Crean una historia falsa elaborada para ganar confianza. «Soy fotógrafo de modelos», «Soy del equipo de moderación», «Trabajo en una ONG»</li>
+                <li><strong>Reciprocidad forzada:</strong> Te dan algo (info, dinero, regalos, skins) para que sientas que les debes algo a cambio</li>
+                <li><strong>Urgencia artificial:</strong> «Tienes que actuar YA o se pierde la oportunidad». Presión temporal para que no pienses</li>
+                <li><strong>Love bombing:</strong> Te inundan de atención, halagos y afecto. Crean una dependencia emocional rápida</li>
+                <li><strong>Aislamiento:</strong> «Esto es nuestro secreto». «Tus padres/amigos no lo entenderían». Te separan de tu red de seguridad</li>
+                <li><strong>Gaslighting:</strong> Te hacen dudar de tu propia percepción. «Eso no pasó», «Estás exagerando»</li>
+                <li><strong>Triangulación:</strong> Mencionan a otros (reales o inventados) para generar celos, competencia o validación</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🔄</div>
+            <h3>Técnicas Aplicadas a Investigación</h3>
+            <p>Estas son las mismas técnicas pero invertidas, usadas para recopilar información sobre sospechosos:</p>
+            <ul>
+                <li><strong>Pretexting inverso:</strong> Crear un personaje creíble que encaje en su comunidad. No para participar en sus actividades, sino para entender su estructura y recopilar datos</li>
+                <li><strong>Elicitation:</strong> El arte de hacer preguntas que no parecen preguntas. «Ah, yo también tengo problemas con mi ISP, ¿cuál usas tú?» — y ya tienes un dato</li>
+                <li><strong>Name dropping:</strong> Mencionar nombres conocidos en su comunidad para generar confianza y que bajen la guardia</li>
+                <li><strong>Alimentar el ego:</strong> Recordemos: muchos son narcisistas. Si les haces sentir importantes, hablan más de la cuenta</li>
+                <li><strong>Provocar en chats grupales:</strong> Un comentario bien colocado puede provocar que revelen información entre ellos mientras discuten</li>
+                <li><strong>Phishing dirigido:</strong> Enviar un enlace de rastreo (IPLogger, Seeker) disfrazado como algo de su interés. Consigues IP, ubicación, dispositivo</li>
+            </ul>
+            <p class="mt1" style="color:var(--danger); font-size:0.85rem;"><strong>Importante:</strong> Documenta TODO. Tu objetivo es recopilar datos, no amenazar. Mantén la calma, no te delates, no cruces líneas.</p>
+        </div>
+        <div class="card">
+            <div class="ci">🧠</div>
+            <h3>Señales de que Te Están Manipulando a Ti</h3>
+            <ul>
+                <li>Sientes urgencia por actuar sin pensar</li>
+                <li>Alguien te pide que mantengas algo en secreto respecto a tu grupo</li>
+                <li>Recibes halagos desproporcionados de alguien que apenas conoces</li>
+                <li>Te piden información personal «por confianza»</li>
+                <li>Te aíslan del resto del equipo con mensajes privados</li>
+                <li>Sientes que «les debes» algo por información o favores anteriores</li>
+                <li>Intentan desacreditar a otros miembros del equipo ante ti</li>
+            </ul>
+            <p class="mt1">Si detectas alguna de estas señales, <strong>avisa al equipo inmediatamente</strong>. No por paranoia, sino por seguridad. Los infiltrados existen.</p>
+        </div>
+        <div class="card">
+            <div class="ci">🛡</div>
+            <h3>Reglas de Oro</h3>
+            <ul>
+                <li><strong>Nunca actúes solo.</strong> Siempre con respaldo del equipo</li>
+                <li><strong>Nunca reveles datos reales.</strong> Ni por error, ni «de confianza»</li>
+                <li><strong>Documenta antes de actuar.</strong> Sin pruebas, tu trabajo no vale nada</li>
+                <li><strong>No te involucres emocionalmente.</strong> Es difícil, pero mantén la cabeza fría</li>
+                <li><strong>Establece un límite de tiempo.</strong> No pases horas seguidas en estas situaciones</li>
+                <li><strong>Si la situación se complica, PARA.</strong> Siempre puedes volver. No puedes deshacerte de un error</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ===================== DENUNCIA ===================== -->
+<section id="denuncia" class="fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Canales de Denuncia</h2>
+
+    <div class="quote mb2">
+        «Si después de todo lo que hemos hecho nosotros, el caso necesita pasar por las vías oficiales — denuncia. No porque el sistema sea perfecto (según RAINN y datos del FBI/BJS, solo 25 de cada 1.000 agresiones sexuales terminan con el agresor en prisión), sino porque a veces es la única forma de ponerle un nombre oficial al expediente de un depredador. Denuncia cuando nosotros ya no podamos hacer más.»
+    </div>
+
+    <h3 class="mb1" style="color:var(--text-bright);">Organizaciones Internacionales</h3>
+    <ul class="rlist mb2">
+        <li><span class="rn">NCMEC CyberTipline</span><span class="rd">Acepta reportes globales de explotación infantil</span><a href="https://report.cybertip.org" target="_blank" class="rl">report.cybertip.org →</a></li>
+        <li><span class="rn">IWF</span><span class="rd">Internet Watch Foundation — para reportar CSAM online</span><a href="https://www.iwf.org.uk" target="_blank" class="rl">iwf.org.uk →</a></li>
+        <li><span class="rn">INHOPE</span><span class="rd">Red internacional de hotlines contra contenido ilegal</span><a href="https://www.inhope.org" target="_blank" class="rl">inhope.org →</a></li>
+        <li><span class="rn">INTERPOL ICSE</span><span class="rd">Base de datos internacional de explotación sexual infantil</span><a href="https://www.interpol.int/Crimes/Crimes-against-children" target="_blank" class="rl">interpol.int →</a></li>
+    </ul>
+
+    <h3 class="mb1" style="color:var(--text-bright);">España</h3>
+    <ul class="rlist mb2">
+        <li><span class="rn">GDT — Guardia Civil</span><span class="rd">Grupo de Delitos Telemáticos</span><a href="https://www.gdt.guardiacivil.es" target="_blank" class="rl">gdt.guardiacivil.es →</a></li>
+        <li><span class="rn">Policía Nacional — BIT</span><span class="rd">Brigada de Investigación Tecnológica</span><a href="https://www.policia.es" target="_blank" class="rl">policia.es →</a></li>
+        <li><span class="rn">SEPRONA</span><span class="rd">Maltrato animal — Guardia Civil</span><a href="https://www.guardiacivil.es" target="_blank" class="rl">guardiacivil.es →</a></li>
+        <li><span class="rn">ANAR — 116 111</span><span class="rd">Teléfono del menor (24h, gratuito, confidencial)</span><a href="https://www.anar.org" target="_blank" class="rl">anar.org →</a></li>
+    </ul>
+
+    <h3 class="mb1" style="color:var(--text-bright);">Reporte en Plataformas</h3>
+    <div class="tw">
+        <table>
+            <thead><tr><th>Plataforma</th><th>Canal</th><th>Nota</th></tr></thead>
+            <tbody>
+                <tr><td>Discord</td><td>dis.gd/report + Trust & Safety</td><td>Incluye IDs de mensaje y usuario</td></tr>
+                <tr><td>Telegram</td><td>@notoscam / abuse@telegram.org</td><td>Desde la app: Reportar</td></tr>
+                <tr><td>Instagram / Meta</td><td>Botón Reportar</td><td>Meta colabora con NCMEC</td></tr>
+                <tr><td>TikTok</td><td>Reportar + legal@tiktok.com</td><td>Categoría «menor en riesgo»</td></tr>
+                <tr><td>YouTube</td><td>Reportar → Abuso infantil / Crueldad animal</td><td>Google tiene equipo dedicado</td></tr>
+                <tr><td>Twitter / X</td><td>Formulario de reporte</td><td>«Explotación de menores»</td></tr>
+                <tr><td>Reddit</td><td>reddit.com/report</td><td>Categoría CSAM específica</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <h3 class="mb1 mt2" style="color:var(--text-bright);">Retirada Legal de Contenido (Takedown)</h3>
+    <p style="color:var(--text-dim); margin-bottom: 1rem;">Si encuentras contenido ilegal en una web, estos son los pasos legales para solicitar su retirada:</p>
+    <div class="card">
+        <ul>
+            <li><strong>1. Identifica el hosting:</strong> WHOIS lookup (whois.domaintools.com) → quién aloja la web</li>
+            <li><strong>2. Reporta al hosting:</strong> Correo abuse@ del proveedor (abuse@cloudflare.com, etc.)</li>
+            <li><strong>3. Reporta al registrador del dominio:</strong> Pueden suspender el dominio completo</li>
+            <li><strong>4. CDNs:</strong> Cloudflare, Akamai tienen políticas de abuso. Envía reporte</li>
+            <li><strong>5. Google:</strong> Para desindexar de resultados de búsqueda</li>
+            <li><strong>6. Autoridades:</strong> NCMEC, IWF, policía nacional</li>
+        </ul>
+    </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== MITOS VS REALIDAD ===================== -->
+<div class="alt-bg" id="mitos">
+<div class="inner fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Mitos vs Realidad</h2>
+    <p class="ssub">Hay ideas falsas que llevan décadas circulando y que protegen indirectamente a los depredadores. Desmontarlas es parte de la lucha.</p>
+
+    <div class="myth">
+        <div class="myth-false">✗ «Los depredadores son desconocidos que se esconden en callejones oscuros»</div>
+        <div class="myth-true">Según datos del CDC y el Departamento de Justicia de EE.UU., alrededor del 90% de las víctimas de abuso sexual infantil conocían a su agresor (aproximadamente un 30% son familiares y hasta un 60% conocidos de confianza de la familia). El «extraño peligroso» es la minoría.</div>
+    </div>
+    <div class="myth">
+        <div class="myth-false">✗ «Solo pasa en la dark web, no en las plataformas normales»</div>
+        <div class="myth-true">La mayoría del grooming ocurre en plataformas convencionales: Instagram, TikTok, Snapchat, Discord, Roblox, Fortnite. La dark web se usa para distribuir material, pero el primer contacto casi siempre es en la «surface web».</div>
+    </div>
+    <div class="myth">
+        <div class="myth-false">✗ «Si solo mira y no toca, no es peligroso»</div>
+        <div class="myth-true">Consumir CSAM financia directamente el abuso. Cada descarga crea demanda de más material, lo que implica más víctimas. Estudios de Seto (2008) y Babchishin et al. (2015) muestran que los consumidores presentan tasas más altas de distorsiones cognitivas y muchos escalan con el tiempo.</div>
+    </div>
+    <div class="myth">
+        <div class="myth-false">✗ «Los pedófilos tienen una apariencia sospechosa, se les nota»</div>
+        <div class="myth-true">Los depredadores suelen ser personas aparentemente normales, integradas socialmente, con trabajos estables. Muchos buscan activamente posiciones de confianza (educadores, entrenadores, voluntarios) para tener acceso a menores.</div>
+    </div>
+    <div class="myth">
+        <div class="myth-false">✗ «El maltrato animal es un delito menor, no es tan grave»</div>
+        <div class="myth-true">El FBI lo clasifica como delito grave (Categoría A) desde 2016 porque es un predictor documentado de violencia contra humanos. Un estudio de la MSPCA y Northeastern University halló que los maltratadores de animales tienen 5 veces más probabilidades de cometer delitos violentos contra personas.</div>
+    </div>
+    <div class="myth">
+        <div class="myth-false">✗ «Las víctimas mienten o exageran»</div>
+        <div class="myth-true">Las denuncias falsas de abuso sexual representan entre el 2% y el 8% del total según estudios académicos. Según datos de RAINN y el BJS, alrededor del 69% de las agresiones sexuales ni siquiera llegan a denunciarse ante la policía.</div>
+    </div>
+    <div class="myth">
+        <div class="myth-false">✗ «Si el menor no se resistió, es que consentía»</div>
+        <div class="myth-true">Un menor NO puede consentir. Punto. El grooming, la manipulación, la autoridad del adulto y el miedo paralizan. La ausencia de resistencia física no es consentimiento. Es sometimiento.</div>
+    </div>
+    <div class="myth">
+        <div class="myth-false">✗ «El sistema judicial ya se encarga de esto, no hace falta que hagamos nada»</div>
+        <div class="myth-true">Según RAINN (con datos del FBI y BJS), solo 28 de cada 1.000 agresiones sexuales terminan en condena por delito grave y 25 en prisión. Los tiempos judiciales son lentos y los recursos limitados. La colaboración ciudadana ha sido clave en grandes desmantelamientos recientes.</div>
+    </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ===================== RECURSOS ===================== -->
+<div class="alt-bg" id="recursos">
+<div class="inner fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Recursos</h2>
+    <p class="ssub">Material que te puede servir, ya sea para formarte, entender mejor el problema, o simplemente para no perder la cabeza en el proceso.</p>
+
+    <div class="grid g3">
+        <div class="card">
+            <div class="ci">🔧</div>
+            <h3>Privacidad y Seguridad</h3>
+            <ul>
+                <li><strong>Tor Browser</strong> — torproject.org</li>
+                <li><strong>Tails OS</strong> — tails.net</li>
+                <li><strong>Mullvad VPN</strong> — mullvad.net</li>
+                <li><strong>ProtonMail</strong> — proton.me</li>
+                <li><strong>Signal</strong> — signal.org</li>
+                <li><strong>VeraCrypt</strong> — veracrypt.fr</li>
+                <li><strong>KeePassXC</strong> — keepassxc.org</li>
+                <li><strong>Qubes OS</strong> — qubes-os.org</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">📺</div>
+            <h3>Documentales y Libros</h3>
+            <ul>
+                <li>«Don't F**k with Cats» — investigación ciudadana que atrapó a un asesino</li>
+                <li>«Caught in the Net» (2020) — grooming en tiempo real</li>
+                <li>«The Children in the Pictures» (2023) — el trabajo de los investigadores</li>
+                <li>«Earthlings» (2005) — la realidad del maltrato animal en la industria</li>
+                <li>«Predators» de Anna Salter — cómo operan los depredadores</li>
+                <li>«The Anatomy of Evil» de Michael Stone — perfiles de agresores</li>
+                <li>«Protecting the Gift» de Gavin de Becker</li>
+                <li>«The Gift of Fear» — detectar depredadores por instinto</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">🧠</div>
+            <h3>Tu Salud Mental</h3>
+            <p>No te vamos a mentir: exponerse a esto destroza. No eres débil por necesitar ayuda, eres humano.</p>
+            <ul>
+                <li>Establece límites de tiempo para las sesiones</li>
+                <li>No consumas este contenido antes de dormir</li>
+                <li>Habla con un profesional regularmente</li>
+                <li>Grounding: 5 cosas que ves, 4 que tocas, 3 que oyes, 2 que hueles, 1 que saboreas</li>
+                <li>Haz ejercicio físico — reduce el estrés postraumático</li>
+                <li>Es OK parar. Puedes volver cuando estés listo/a</li>
+                <li>El resto del equipo entiende. Para eso estamos</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">📊</div>
+            <h3>Organizaciones que Luchan</h3>
+            <ul>
+                <li><strong>Thorn</strong> — tecnología contra la explotación infantil (thorn.org)</li>
+                <li><strong>NCMEC</strong> — missingkids.org</li>
+                <li><strong>Polaris Project</strong> — contra la trata de personas</li>
+                <li><strong>Save the Children</strong></li>
+                <li><strong>ECPAT International</strong></li>
+                <li><strong>Europol EC3</strong> — Centro Europeo de Ciberdelincuencia</li>
+                <li><strong>PETA / AnimaNaturalis</strong></li>
+                <li><strong>Canadian Centre for Child Protection</strong></li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">⚖</div>
+            <h3>Marco Legal (Resumen)</h3>
+            <ul>
+                <li><strong>España:</strong> Art. 183-189 CP (delitos sexuales contra menores, 1-9 años). Art. 337 (maltrato animal, hasta 4 años)</li>
+                <li><strong>EE.UU.:</strong> PROTECT Act, 18 USC §2251 (15-30 años). Animal Crush Video Act</li>
+                <li><strong>UE:</strong> Directiva 2011/93/UE. Convenio de Lanzarote</li>
+                <li><strong>Internacional:</strong> Convención sobre Derechos del Niño (ONU). Protocolo de Palermo</li>
+            </ul>
+        </div>
+        <div class="card">
+            <div class="ci">⚔</div>
+            <h3>Cómo Colaborar</h3>
+            <ul>
+                <li>Únete a Fpsychos — Discord o email</li>
+                <li>Reporta todo lo que encuentres. No asumas que «ya lo habrá visto alguien»</li>
+                <li>Difunde contenido educativo en tus redes</li>
+                <li>Si sabes programar, contribuye a herramientas de detección</li>
+                <li>Presiona a tus representantes políticos para endurecer las penas</li>
+                <li>Ofrécete como voluntario en protectoras locales</li>
+                <li>Dona a organizaciones que luchan activamente</li>
+            </ul>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ===================== GLOSARIO ===================== -->
+<section id="glosario" class="fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Glosario</h2>
+    <p class="ssub">Términos que necesitas conocer para entender este mundo y comunicarte con precisión dentro del equipo.</p>
+
+    <dl class="gloss-grid">
+        <div class="gloss-item"><dt>CSAM</dt><dd>Child Sexual Abuse Material. Material de abuso sexual infantil. El término correcto — no «pornografía infantil», que minimiza la gravedad.</dd></div>
+        <div class="gloss-item"><dt>Grooming</dt><dd>Proceso manipulativo mediante el cual un depredador gana la confianza de un menor para prepararlo para el abuso. Puede durar semanas o meses.</dd></div>
+        <div class="gloss-item"><dt>Hurtcore</dt><dd>Categoría extrema de CSAM que involucra violencia, tortura y sadismo. Considerado el escalón más grave.</dd></div>
+        <div class="gloss-item"><dt>Sextortion</dt><dd>Chantaje sexual. El agresor obtiene imágenes íntimas y amenaza con difundirlas para obtener más material, dinero o favores.</dd></div>
+        <div class="gloss-item"><dt>OSINT</dt><dd>Open Source Intelligence. Recopilación de información a partir de fuentes públicas: redes sociales, registros, bases de datos abiertas.</dd></div>
+        <div class="gloss-item"><dt>Doxing</dt><dd>Investigar y exponer públicamente la identidad real de una persona anónima en Internet: nombre, dirección, teléfono, lugar de trabajo.</dd></div>
+        <div class="gloss-item"><dt>OPSEC</dt><dd>Operational Security. Prácticas para proteger tu identidad y actividad durante investigaciones. VPN, Tor, cuentas falsas, cifrado.</dd></div>
+        <div class="gloss-item"><dt>DDoS</dt><dd>Distributed Denial of Service. Ataque que satura un servidor con tráfico masivo para dejarlo inaccesible.</dd></div>
+        <div class="gloss-item"><dt>Ingeniería Social</dt><dd>Manipulación psicológica para que una persona revele información confidencial o realice acciones que comprometan su seguridad.</dd></div>
+        <div class="gloss-item"><dt>Phishing</dt><dd>Engaño mediante páginas, emails o mensajes falsos que imitan servicios legítimos para robar credenciales o datos.</dd></div>
+        <div class="gloss-item"><dt>Crush Fetish</dt><dd>Parafilia que implica tortura y aplastamiento de animales pequeños. Contenido distribuido en redes ilegales.</dd></div>
+        <div class="gloss-item"><dt>Honeypot</dt><dd>Trampa diseñada para atraer criminales. Las fuerzas de seguridad a veces mantienen sitios abiertos para identificar a sus usuarios.</dd></div>
+        <div class="gloss-item"><dt>PCL-R</dt><dd>Psychopathy Checklist-Revised. Escala de Hare para medir psicopatía. Puntuación máxima: 40. Los depredadores seriales puntúan 25-30.</dd></div>
+        <div class="gloss-item"><dt>Dark Web</dt><dd>Parte de Internet accesible solo a través de redes como Tor. No todo su contenido es ilegal, pero las redes criminales la explotan.</dd></div>
+        <div class="gloss-item"><dt>Takedown</dt><dd>Proceso de solicitar la retirada de contenido ilegal contactando al hosting, registrador de dominio, CDN o autoridades.</dd></div>
+        <div class="gloss-item"><dt>Elicitation</dt><dd>Técnica de ingeniería social: extraer información haciendo preguntas que parecen inocentes o conversación casual.</dd></div>
+        <div class="gloss-item"><dt>EXIF</dt><dd>Metadatos de imágenes: fecha, hora, coordenadas GPS, modelo de cámara/teléfono. Muchos depredadores olvidan borrarlos.</dd></div>
+        <div class="gloss-item"><dt>Hash (SHA256)</dt><dd>Huella digital única de un archivo. Se usa para identificar CSAM conocido (PhotoDNA) y para demostrar que una prueba no ha sido alterada.</dd></div>
+    </dl>
+</section>
+
+<div class="divider"></div>
+
+<!-- ===================== FAQ ===================== -->
+<div class="alt-bg" id="faq">
+<div class="inner fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Preguntas Frecuentes</h2>
+    <p class="ssub">Lo que más nos preguntan cuando alguien llega a la comunidad.</p>
+
+    <div class="acc">
+        <div class="acc-item">
+            <div class="acc-head">¿Puedo meterme en problemas por investigar? <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <p>Sí, si cruzas la línea. <strong>NUNCA</strong> descargues, almacenes ni distribuyas CSAM — ni siquiera como «prueba». Eso es delito en todos los países y destruye evidencia forense. Tu papel es <strong>identificar URLs, perfiles y datos</strong>, documentarlos con capturas y entregarlos. No hackees, no amenaces. Si recopilas información de fuentes públicas (OSINT), no estás cometiendo ningún delito.</p>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">¿Puedo denunciar de forma anónima? <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <p><strong>Sí.</strong> NCMEC CyberTipline, IWF, GDT (Guardia Civil), y todas las plataformas (Discord, Telegram, Instagram, etc.) aceptan reportes anónimos. No necesitas identificarte para salvar una vida. Si prefieres canalizar la denuncia a través de nosotros, escríbenos al Discord o al email.</p>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">¿Funciona realmente reportar? <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <p>Los reportes por sí solos muchas veces no bastan — por eso existimos. Pero son una pieza del puzzle. Operaciones como Boystown (400.000 miembros), Welcome to Video (337 arrestos) y la captura de Luka Magnotta empezaron con reportes ciudadanos. Cada dato suma. Lo ideal es reportar Y actuar a través de comunidades como la nuestra.</p>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">¿Qué hago si encuentro CSAM accidentalmente? <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <p>1. <strong>No descargues nada.</strong> 2. Copia la URL exacta. 3. Reporta a <a href="https://report.cybertip.org" target="_blank">NCMEC CyberTipline</a> y/o <a href="https://www.iwf.org.uk" target="_blank">IWF</a>. 4. Si estás en España, reporta al GDT. 5. Cierra la pestaña. 6. Si necesitas apoyo emocional, es completamente normal — contacta con nosotros o con una línea de ayuda. Nadie debería procesar eso solo.</p>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">¿Es legal usar Tor y VPN? <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <p><strong>Sí</strong>, en la mayoría de países. Tor y las VPNs son herramientas legales de privacidad usadas por periodistas, activistas, investigadores y ciudadanos normales. Lo ilegal es usarlas para cometer delitos. Proteger tu privacidad mientras investigas es tu derecho, y es exactamente lo que recomendamos.</p>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">¿Cómo puedo ayudar si no tengo conocimientos técnicos? <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <p>Hay muchas formas. Difunde información en tus redes sociales. Educa a los menores de tu entorno. Dona a organizaciones como Thorn o Save the Children. Firma peticiones para endurecer las leyes. Únete a nuestro Discord — no todo el mundo tiene que estar en primera línea técnica. Necesitamos divulgadores, coordinadores, gente que documente. Cada rol cuenta.</p>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">¿Cómo sé que Fpsychos es de fiar? <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <p>No te pedimos que confíes ciegamente. Entra al Discord, observa, haz preguntas. Nuestro código es claro: no compartimos material ilegal, no actuamos solos, priorizamos la seguridad de las víctimas. Si algo te parece raro, sal. Pero si lo que ves te convence, quédate y aporta. Esto se construye con confianza ganada, no pedida.</p>
+            </div></div>
+        </div>
+        <div class="acc-item">
+            <div class="acc-head">¿Qué pasa si un depredador me descubre investigándolo? <span class="arr">▼</span></div>
+            <div class="acc-body"><div class="acc-inner">
+                <p>Por eso insistimos tanto en el OPSEC. Si has seguido las recomendaciones (VPN, cuentas falsas, identidad separada), no debería poder llegar a ti. Si sientes que has sido identificado: 1. Corta todo contacto inmediatamente. 2. Avisa al equipo en Discord. 3. Revisa y refuerza tu seguridad. 4. Si hay amenazas concretas, contacta con la policía. No actúes solo, para eso está el grupo.</p>
+            </div></div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="divider"></div>
+
+<!-- ===================== COMUNIDAD ===================== -->
+<section id="comunidad" class="fi">
+    <div class="sbar"></div>
+    <h2 class="stitle">Únete a Fpsychos</h2>
+    <p class="ssub">No estás solo en esto. Hay más gente cabreada de la que crees. Coordínate con nosotros.</p>
+
+    <div class="comm-grid">
+        <div class="comm-card">
+            <img src="logo.jpg" alt="Fpsychos">
+            <h3>Discord</h3>
+            <p>Nuestra base de operaciones. Canales de coordinación, noticias, herramientas, investigaciones activas y apoyo. Activos 24/7.</p>
+            <a href="https://discord.gg/aWt5NNmFVg" target="_blank" class="btn btn-fill">Entrar al Discord →</a>
+        </div>
+        <div class="comm-card">
+            <img src="logo.jpg" alt="Fpsychos">
+            <h3>Email</h3>
+            <p>¿Tienes información sensible? ¿Quieres colaborar de forma privada? ¿Necesitas ayuda? Escríbenos.</p>
+            <a href="mailto:fuckpsychos@gmail.com" class="btn btn-ghost">fuckpsychos@gmail.com</a>
+        </div>
+        <div class="comm-card">
+            <img src="logo.jpg" alt="Fpsychos">
+            <h3>Nuestro Código</h3>
+            <ul style="list-style:none; text-align:left; margin-top:1rem;">
+                <li style="padding:0.3rem 0; color:var(--text-dim);">✓ &nbsp;Respeto absoluto entre miembros</li>
+                <li style="padding:0.3rem 0; color:var(--text-dim);">✓ &nbsp;La seguridad de las víctimas es lo primero</li>
+                <li style="padding:0.3rem 0; color:var(--text-dim);">✓ &nbsp;No compartir material ilegal bajo ningún concepto</li>
+                <li style="padding:0.3rem 0; color:var(--text-dim);">✓ &nbsp;Coordinación y trabajo en equipo</li>
+                <li style="padding:0.3rem 0; color:var(--text-dim);">✓ &nbsp;Cuidar la salud mental del equipo</li>
+                <li style="padding:0.3rem 0; color:var(--text-dim);">✓ &nbsp;Ninguna acción sin respaldo del grupo</li>
+            </ul>
+        </div>
+    </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+    <img src="logo.jpg" alt="Fpsychos" style="width:44px;height:44px;border-radius:50%;margin-bottom:0.8rem;border:2px solid var(--purple-deep);">
+    <p><strong>Fpsychos</strong> — Contra los depredadores.</p>
+    <p>Este sitio no almacena datos personales ni aloja contenido ilegal.</p>
+    <p>En peligro → <strong>112</strong> (Europa) o emergencias de tu país.</p>
+    <div class="foot-links">
+        <a href="#top">Inicio</a>
+        <a href="#problema">La Realidad</a>
+        <a href="#redes">Sus Redes</a>
+        <a href="#casos">Casos Reales</a>
+        <a href="#perfil">Sus Cabezas</a>
+        <a href="#ciber">Arsenal</a>
+        <a href="#opsec">OPSEC</a>
+        <a href="#ingenieria">Ing. Social</a>
+        <a href="#mitos">Mitos</a>
+        <a href="#glosario">Glosario</a>
+        <a href="#faq">FAQ</a>
+        <a href="#comunidad">Únete</a>
+        <a href="https://discord.gg/aWt5NNmFVg" target="_blank">Discord</a>
+        <a href="mailto:fuckpsychos@gmail.com">Email</a>
+    </div>
+    <p style="margin-top:1.2rem;font-size:0.7rem;color:#444;">© 2024-2026 Fpsychos. Hecho con rabia y propósito.</p>
+</footer>
+
+<div class="nav-overlay" id="navOverlay"></div>
+<button class="btt" id="btt" aria-label="Arriba">↑</button>
+
+<script>
+// Nav
+const burger=document.getElementById('burger'),nm=document.getElementById('navMenu'),overlay=document.getElementById('navOverlay');
+function toggleMenu(){nm.classList.toggle('open');burger.classList.toggle('active');overlay.classList.toggle('show');document.body.style.overflow=nm.classList.contains('open')?'hidden':'';}
+burger.addEventListener('click',toggleMenu);
+overlay.addEventListener('click',toggleMenu);
+nm.querySelectorAll('a').forEach(a=>a.addEventListener('click',()=>{if(nm.classList.contains('open'))toggleMenu();}));
+let ly=0;const nav=document.getElementById('nav');
+window.addEventListener('scroll',()=>{const c=window.pageYOffset;nav.classList.toggle('hide',c>ly&&c>80);ly=c;});
+// Active link
+const sects=document.querySelectorAll('section[id],div.alt-bg[id]'),nlinks=document.querySelectorAll('.nav-menu a');
+window.addEventListener('scroll',()=>{let cur='';sects.forEach(s=>{if(window.pageYOffset>=s.offsetTop-200)cur=s.id;});nlinks.forEach(a=>{a.classList.remove('on');if(a.getAttribute('href')==='#'+cur)a.classList.add('on');});});
+// Back top
+const btt=document.getElementById('btt');
+window.addEventListener('scroll',()=>btt.classList.toggle('on',window.pageYOffset>400));
+btt.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+// Accordion
+document.querySelectorAll('.acc-head').forEach(h=>{h.addEventListener('click',()=>{const i=h.parentElement,b=i.querySelector('.acc-body'),o=i.classList.contains('open');i.parentElement.querySelectorAll('.acc-item.open').forEach(x=>{x.classList.remove('open');x.querySelector('.acc-body').style.maxHeight=null;});if(!o){i.classList.add('open');b.style.maxHeight=b.scrollHeight+'px';}});});
+// Fade in
+const obs=new IntersectionObserver(e=>e.forEach(x=>{if(x.isIntersecting){x.target.classList.add('vis');obs.unobserve(x.target);}}),{threshold:0.08});
+document.querySelectorAll('.fi').forEach(el=>obs.observe(el));
+// Ticker
+const tickerEl=document.getElementById('tickerCount');
+let tickerStart=Date.now();
+function updateTicker(){const elapsed=(Date.now()-tickerStart)/1000;const count=Math.floor(elapsed*3.3);tickerEl.textContent=count.toLocaleString('es-ES');requestAnimationFrame(updateTicker);}
+updateTicker();
+</script>
+</body>
+</html>
